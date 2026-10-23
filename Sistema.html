@@ -261,17 +261,6 @@
               <i data-lucide="scan-line" class="w-6 h-6 text-[#00e082]"></i>
               <span>Escáner Operativo & Visor OCR ROI</span>
             </h1>
-            <p class="text-xs text-slate-400 font-mono mt-0.5">Captura industrial, validación estricta anti-duplicados y transmisión instantánea a Google Sheets</p>
-          </div>
-          <div class="flex items-center gap-3">
-            <button id="btn-toggle-camera" onclick="togglePhysicalCamera()" class="flex items-center gap-2 bg-surface-850 hover:bg-surface-800 border border-surface-700 px-3 py-1.5 rounded text-xs font-mono transition text-slate-300 cursor-pointer">
-              <i data-lucide="video" class="w-3.5 h-3.5 text-emerald-400"></i>
-              <span id="camera-status-label">CÁMARA TRASERA 1080p (24FPS)</span>
-            </button>
-            <button onclick="simulateScan()" class="bg-[#00e082] hover:bg-[#00c773] text-black font-mono font-bold text-xs px-4 py-2 rounded flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 cursor-pointer">
-              <i data-lucide="scan" class="w-4 h-4"></i>
-              SIMULAR ESCANEO INGRESO
-            </button>
           </div>
         </div>
 
@@ -481,7 +470,6 @@
               <i data-lucide="boxes" class="w-6 h-6 text-[#00e082]"></i>
               <span>Módulo de Inventario & Recepción Consolidada</span>
             </h1>
-            <p class="text-xs text-slate-400 font-mono mt-0.5">Control de bultos ingresados, semáforo SLA de 3 días máximo y matriz de stock en bodega</p>
           </div>
           <div class="flex items-center gap-2">
             <button onclick="exportarInventario()" class="bg-surface-800 hover:bg-surface-750 text-slate-200 border border-surface-700 font-mono text-xs px-3 py-2 rounded flex items-center gap-1.5 transition cursor-pointer">
@@ -596,7 +584,6 @@
               <i data-lucide="truck" class="w-6 h-6 text-[#00e082]"></i>
               <span>Módulo de Salidas / Despacho</span>
             </h1>
-            <p class="text-xs text-slate-400 font-mono mt-0.5">Escaneo óptico de salida con asignación de personal operativo y exportación de manifiestos</p>
           </div>
           <div class="flex items-center gap-2">
             <button onclick="exportarExcelSalidas()" class="bg-surface-800 hover:bg-surface-750 text-slate-200 border border-surface-700 font-mono text-xs px-3 py-2 rounded flex items-center gap-1.5 transition cursor-pointer">
@@ -642,27 +629,6 @@
                     class="w-full bg-surface-950 border border-surface-750 rounded-lg pl-9 pr-3 py-2 text-white font-semibold focus:outline-none focus:border-[#00e082]">
                 </div>
               </div>
-
-              <!-- Selector de Destino / Vehículo -->
-              <div class="grid grid-cols-2 gap-2 pt-1">
-                <div>
-                  <label class="block text-slate-400 text-[10px] mb-1">DESTINO FINAL:</label>
-                  <select id="select-destino-salida" class="w-full bg-surface-950 border border-surface-750 rounded p-1.5 text-slate-200">
-                    <option value="ORP MOLINON">ORP MOLINON</option>
-                    <option value="HUB-CENTRAL SPS">HUB-CENTRAL SPS</option>
-                    <option value="CD SIGUATEPEQUE">CD SIGUATEPEQUE</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-slate-400 text-[10px] mb-1">PLACA / VEHÍCULO:</label>
-                  <input id="input-vehiculo" type="text" value="HDA-9982 (CAMIÓN 5T)" class="w-full bg-surface-950 border border-surface-750 rounded p-1.5 text-slate-200">
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-4 pt-3 border-t border-surface-800 flex items-center justify-between text-[11px] text-slate-400">
-              <span>BULTOS ASIGNADOS HOY: <b id="salidas-badge-count" class="text-white">0</b></span>
-              <span class="text-emerald-400 font-bold">ÁREA DE DESPACHO LISTA</span>
             </div>
           </div>
 
@@ -1006,10 +972,6 @@
       </span>
       <span class="text-surface-700">|</span>
       <span>Bodega Central Amarateca</span>
-    </div>
-    <div class="flex items-center gap-4 text-[11px]">
-      <span class="text-slate-500">ATAJOS: [ALT+1] Ingreso · [ALT+2] Salidas · [ALT+3] Admin</span>
-      <span class="text-emerald-500 font-bold">PUERTO 8080 OK</span>
     </div>
   </footer>
 
@@ -1585,7 +1547,7 @@
             video.classList.remove('hidden');
             canvasOverlay.classList.add('opacity-40');
             isRealCameraRunning = true;
-            label.innerText = 'CÁMARA FÍSICA TRASERA ACTIVA';
+            if (label) label.innerText = 'CÁMARA FÍSICA TRASERA ACTIVA';
             showTacticalToast('Sensor óptico trasero iniciado.', 'success');
           } else {
             showTacticalToast('Dispositivo óptico en modo emulador táctico.', 'warning');
@@ -1600,7 +1562,7 @@
         video.classList.add('hidden');
         canvasOverlay.classList.remove('opacity-40');
         isRealCameraRunning = false;
-        label.innerText = 'CÁMARA TRASERA 1080p (24FPS)';
+        if (label) label.innerText = 'CÁMARA TRASERA';
         showTacticalToast('Emulador óptico reactivado.', 'info');
       }
     }
@@ -1746,12 +1708,14 @@
         document.getElementById('salida-current-dest').innerText = item.destination;
         appState.preparedDest = item.destination;
 
-        // Seleccionar destino correspondiente en el dropdown
+        // Seleccionar destino correspondiente en el dropdown si existe
         const sel = document.getElementById('select-destino-salida');
-        for (let i = 0; i < sel.options.length; i++) {
-          if (item.destination.toUpperCase().includes(sel.options[i].value.toUpperCase())) {
-            sel.selectedIndex = i;
-            break;
+        if (sel) {
+          for (let i = 0; i < sel.options.length; i++) {
+            if (item.destination.toUpperCase().includes(sel.options[i].value.toUpperCase())) {
+              sel.selectedIndex = i;
+              break;
+            }
           }
         }
       }
@@ -1811,7 +1775,8 @@
           </tr>
         `;
         document.getElementById('historial-salidas-count').innerText = '0 BULTOS DESPACHADOS';
-        document.getElementById('salidas-badge-count').innerText = '0';
+        const sBadge0 = document.getElementById('salidas-badge-count');
+        if (sBadge0) sBadge0.innerText = '0';
         lucide.createIcons();
         return;
       }
@@ -1842,15 +1807,16 @@
       });
 
       document.getElementById('historial-salidas-count').innerText = `${appState.totalDispatchedToday} BULTOS DESPACHADOS`;
-      document.getElementById('salidas-badge-count').innerText = appState.inventory.length;
+      const sBadgeTotal = document.getElementById('salidas-badge-count');
+      if (sBadgeTotal) sBadgeTotal.innerText = appState.inventory.length;
       lucide.createIcons();
     }
 
     async function registrarSalidaManual() {
       const despachador = document.getElementById('input-despachador').value.trim();
       const motorista = document.getElementById('input-motorista').value.trim();
-      const destino = document.getElementById('select-destino-salida').value;
-      const vehiculo = document.getElementById('input-vehiculo').value.trim();
+      const destino = document.getElementById('select-destino-salida')?.value || appState.preparedDest || (appState.inventory.find(i => i.ticket === appState.preparedTicket)?.destination) || 'DESTINO ASIGNADO';
+      const vehiculo = document.getElementById('input-vehiculo')?.value.trim() || 'UNIDAD ASIGNADA';
 
       if (!despachador || !motorista) {
         showTacticalToast('Error: Nombre del Despachador y Motorista son obligatorios.', 'error');
@@ -1951,10 +1917,10 @@
 
       const now = new Date();
       const manifestId = `MANIF-${now.getFullYear()}-${String(appState.dispatchHistory.length).padStart(3, '0')}`;
-      const despachador = document.getElementById('input-despachador').value || 'Mendoza, Rafael';
-      const motorista = document.getElementById('input-motorista').value || 'Figueroa, Luis';
-      const destino = document.getElementById('select-destino-salida').value;
-      const vehiculo = document.getElementById('input-vehiculo').value;
+      const despachador = document.getElementById('input-despachador')?.value || 'Mendoza, Rafael';
+      const motorista = document.getElementById('input-motorista')?.value || 'Figueroa, Luis';
+      const destino = document.getElementById('select-destino-salida')?.value || appState.preparedDest || (appState.dispatchHistory[0]?.destination) || 'DESTINO ASIGNADO';
+      const vehiculo = document.getElementById('input-vehiculo')?.value || 'UNIDAD ASIGNADA';
 
       const bodyHtml = `
         <div class="space-y-3">
