@@ -1,0 +1,10 @@
+{
+  "name": "Sistema Táctico de Logística - Bodega Central Amarateca",
+  "description": "Sistema de gestión de paquetería táctica, escáner OCR, control de inventario con semáforo SLA de 3 días y despacho sincronizado con Google Sheets.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
