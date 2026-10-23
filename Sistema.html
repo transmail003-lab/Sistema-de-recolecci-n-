@@ -274,7 +274,19 @@
               <video id="live-video-stream" class="hidden absolute inset-0 w-full h-full object-cover z-0" autoplay playsinline muted></video>
 
               <!-- Live Camera Simulation Canvas -->
-              <div id="sim-canvas-overlay" class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-surface-850 via-[#0a0d12] to-black opacity-90"></div>
+              <div id="sim-canvas-overlay" class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-surface-850 via-[#0a0d12] to-black opacity-90 transition-opacity duration-300"></div>
+
+              <!-- Floating Camera Control Bar -->
+              <div class="absolute top-3 right-3 z-30 flex items-center gap-2">
+                <button id="btn-switch-cam-ingreso" onclick="switchCameraFacing('ingreso')" class="hidden bg-surface-900/90 hover:bg-surface-800 border border-surface-700 text-slate-200 px-2.5 py-1.5 rounded-lg text-xs font-mono transition flex items-center gap-1.5 cursor-pointer shadow-lg backdrop-blur" title="Girar Cámara">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-[#00e082]"></i>
+                  <span>GIRAR</span>
+                </button>
+                <button id="btn-camera-toggle-ingreso" onclick="togglePhysicalCamera('ingreso')" class="flex items-center gap-1.5 bg-[#00e082] hover:bg-[#00c773] text-black px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition shadow-lg shadow-emerald-500/20 active:scale-95 cursor-pointer backdrop-blur">
+                  <i id="btn-cam-icon-ingreso" data-lucide="video" class="w-4 h-4"></i>
+                  <span id="btn-cam-text-ingreso">ENCENDER CÁMARA</span>
+                </button>
+              </div>
               
               <!-- Warehouse Package Target Box -->
               <div id="scanner-reticle-box" class="relative z-10 w-4/5 max-w-lg aspect-[16/10] border-2 border-emerald-500/80 rounded-lg p-4 bg-surface-900/90 backdrop-blur-sm flex flex-col justify-between shadow-[0_0_30px_rgba(0,224,130,0.15)] transition-colors duration-200">
@@ -320,9 +332,9 @@
               </div>
 
               <!-- Live Stream indicator on camera -->
-              <div class="absolute bottom-3 left-4 flex items-center gap-2 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full border border-surface-700 text-[10px] font-mono z-10">
-                <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-                <span id="camera-stream-badge" class="text-slate-200 font-bold uppercase tracking-wider">CÁMARA TRASERA EN VIVO</span>
+              <div id="camera-status-container" class="absolute bottom-3 left-4 flex items-center gap-2 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full border border-surface-700 text-[10px] font-mono z-10 cursor-pointer" onclick="togglePhysicalCamera('ingreso')" title="Click para activar/desactivar cámara">
+                <span id="camera-status-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                <span id="camera-stream-badge" class="text-slate-300 font-bold uppercase tracking-wider">CÁMARA ÓPTICA INACTIVA</span>
               </div>
             </div>
           </div>
@@ -634,13 +646,23 @@
 
           <!-- Cámara de Salida Táctica -->
           <div class="xl:col-span-7 bg-surface-900 border border-surface-750 rounded-xl overflow-hidden flex flex-col relative shadow-xl">
-            <div class="h-60 bg-black flex items-center justify-center relative overflow-hidden">
-              <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-surface-850 via-black to-black opacity-80"></div>
+            <div class="h-60 bg-black flex items-center justify-center relative overflow-hidden group">
+              <!-- Live Video Stream for Salidas -->
+              <video id="live-video-stream-salida" class="hidden absolute inset-0 w-full h-full object-cover z-0" autoplay playsinline muted></video>
+              <div id="sim-canvas-overlay-salida" class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-surface-850 via-black to-black opacity-80 transition-opacity duration-300"></div>
               
+              <!-- Floating Camera Control Salidas -->
+              <div class="absolute top-3 right-3 z-30 flex items-center gap-2">
+                <button id="btn-camera-toggle-salida" onclick="togglePhysicalCamera('salida')" class="flex items-center gap-1.5 bg-[#00e082] hover:bg-[#00c773] text-black px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition shadow-lg shadow-emerald-500/20 active:scale-95 cursor-pointer backdrop-blur">
+                  <i id="btn-cam-icon-salida" data-lucide="video" class="w-3.5 h-3.5"></i>
+                  <span id="btn-cam-text-salida">ENCENDER CÁMARA</span>
+                </button>
+              </div>
+
               <!-- Scan Box for Exit -->
               <div class="relative z-10 w-3/4 max-w-sm aspect-[16/9] border-2 border-emerald-400/90 rounded-lg p-3 bg-surface-900/80 flex flex-col justify-between">
                 <div class="flex justify-between items-center text-[10px] font-mono">
-                  <span class="text-[#00e082] font-bold">CÁMARA TRASERA // DESPACHO</span>
+                  <span class="text-[#00e082] font-bold">CÁMARA ÓPTICA // DESPACHO</span>
                   <span class="text-slate-400">SCANNER #02</span>
                 </div>
                 <div class="text-center font-mono py-2">
@@ -654,9 +676,9 @@
                 <div class="absolute left-2 right-2 h-0.5 bg-[#00e082] scan-line pointer-events-none"></div>
               </div>
 
-              <div class="absolute bottom-2 left-3 text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                <span>DISPOSITIVO LISTO: CÁMARA TRASERA</span>
+              <div id="camera-status-container-salida" class="absolute bottom-2 left-3 text-[10px] font-mono text-slate-400 flex items-center gap-1.5 cursor-pointer" onclick="togglePhysicalCamera('salida')" title="Click para activar/desactivar cámara">
+                <span id="camera-status-dot-salida" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                <span id="camera-status-label-salida">CÁMARA ÓPTICA: INACTIVA</span>
               </div>
             </div>
 
@@ -1529,41 +1551,295 @@
       showTacticalToast('Cola de recepción actualizada.', 'success');
     }
 
+    /* ==========================================================================
+       GESTIÓN DE SENSORES ÓPTICOS / CÁMARAS EN VIVO CON MULTI-FALLBACK
+       ========================================================================== */
     let isRealCameraRunning = false;
     let cameraMediaStream = null;
+    const cameraState = {
+      activeStream: null,
+      activeTarget: null,
+      facingMode: 'environment',
+      barcodeInterval: null,
+      videoDevices: []
+    };
 
-    async function togglePhysicalCamera() {
-      const video = document.getElementById('live-video-stream');
-      const canvasOverlay = document.getElementById('sim-canvas-overlay');
-      const label = document.getElementById('camera-status-label');
-
-      if (!isRealCameraRunning) {
-        try {
-          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            cameraMediaStream = await navigator.mediaDevices.getUserMedia({
-              video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }
-            });
-            video.srcObject = cameraMediaStream;
-            video.classList.remove('hidden');
-            canvasOverlay.classList.add('opacity-40');
-            isRealCameraRunning = true;
-            if (label) label.innerText = 'CÁMARA FÍSICA TRASERA ACTIVA';
-            showTacticalToast('Sensor óptico trasero iniciado.', 'success');
+    async function checkCameraDevices() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        cameraState.videoDevices = devices.filter(d => d.kind === 'videoinput');
+        const switchBtn = document.getElementById('btn-switch-cam-ingreso');
+        if (switchBtn) {
+          if (cameraState.videoDevices.length > 1) {
+            switchBtn.classList.remove('hidden');
           } else {
-            showTacticalToast('Dispositivo óptico en modo emulador táctico.', 'warning');
+            switchBtn.classList.add('hidden');
           }
-        } catch (err) {
-          showTacticalToast('Cámara física no accesible. Operando con emulador industrial.', 'warning');
         }
-      } else {
-        if (cameraMediaStream) {
-          cameraMediaStream.getTracks().forEach(t => t.stop());
+      } catch (err) {
+        console.warn('enumerateDevices error:', err);
+      }
+    }
+
+    async function getCameraStreamWithFallbacks(preferredFacing) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('MEDIA_NOT_SUPPORTED');
+      }
+
+      // Intento 1: facingMode ideal (trasera en móviles sin causar OverconstrainedError en laptops/webcams)
+      try {
+        return await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: preferredFacing },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+      } catch (e1) {
+        console.warn('Estrategia de cámara 1 (ideal facingMode HD) falló:', e1);
+      }
+
+      // Intento 2: facingMode básico sin restricciones de resolución
+      try {
+        return await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: preferredFacing },
+          audio: false
+        });
+      } catch (e2) {
+        console.warn('Estrategia de cámara 2 (facingMode simple) falló:', e2);
+      }
+
+      // Intento 3: Universal - cualquier cámara conectada (frontal, webcam USB, etc.)
+      try {
+        return await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+      } catch (e3) {
+        console.error('Todas las estrategias de cámara fallaron:', e3);
+        throw e3;
+      }
+    }
+
+    async function togglePhysicalCamera(target = 'ingreso') {
+      const isIngreso = target === 'ingreso';
+      const video = isIngreso ? document.getElementById('live-video-stream') : document.getElementById('live-video-stream-salida');
+      const overlay = isIngreso ? document.getElementById('sim-canvas-overlay') : document.getElementById('sim-canvas-overlay-salida');
+      const btnText = document.getElementById(isIngreso ? 'btn-cam-text-ingreso' : 'btn-cam-text-salida');
+      const btnIcon = document.getElementById(isIngreso ? 'btn-cam-icon-ingreso' : 'btn-cam-icon-salida');
+      const btnToggle = document.getElementById(isIngreso ? 'btn-camera-toggle-ingreso' : 'btn-camera-toggle-salida');
+      const statusBadge = isIngreso ? document.getElementById('camera-stream-badge') : document.getElementById('camera-status-label-salida');
+      const statusDot = isIngreso ? document.getElementById('camera-status-dot') : document.getElementById('camera-status-dot-salida');
+
+      // Si ya está activa en este mismo visor, apagarla
+      if (cameraState.activeStream && cameraState.activeTarget === target) {
+        stopCameraStream();
+        showTacticalToast('Sensor óptico desactivado.', 'info');
+        return;
+      }
+
+      // Si está activa en el otro visor, apagarla primero
+      if (cameraState.activeStream) {
+        stopCameraStream();
+      }
+
+      showTacticalToast('Solicitando acceso a sensor óptico / cámara...', 'info', 1500);
+
+      try {
+        const stream = await getCameraStreamWithFallbacks(cameraState.facingMode);
+        cameraState.activeStream = stream;
+        cameraMediaStream = stream;
+        cameraState.activeTarget = target;
+        isRealCameraRunning = true;
+
+        if (video) {
+          video.srcObject = stream;
+          video.classList.remove('hidden');
+          video.setAttribute('playsinline', 'true');
+          video.setAttribute('autoplay', 'true');
+          video.muted = true;
+          try {
+            await video.play();
+          } catch (playErr) {
+            console.log('Video play auto-reanudado:', playErr);
+          }
         }
-        video.classList.add('hidden');
-        canvasOverlay.classList.remove('opacity-40');
+
+        if (overlay) {
+          overlay.classList.remove('opacity-90', 'opacity-80');
+          overlay.classList.add('opacity-20');
+        }
+
+        if (btnToggle) {
+          btnToggle.className = 'flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition shadow-lg shadow-rose-600/30 active:scale-95 cursor-pointer backdrop-blur';
+        }
+        if (btnText) btnText.innerText = 'APAGAR CÁMARA';
+        if (btnIcon) btnIcon.setAttribute('data-lucide', 'video-off');
+
+        if (statusBadge) {
+          statusBadge.innerText = `CÁMARA ${cameraState.facingMode === 'environment' ? 'TRASERA' : 'FRONTAL'} EN VIVO (24FPS)`;
+          statusBadge.className = 'text-emerald-400 font-bold uppercase tracking-wider';
+        }
+        if (statusDot) {
+          statusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-ping';
+        }
+
+        checkCameraDevices();
+        startLiveBarcodeScanner(video);
+
+        lucide.createIcons();
+        playTacticalAudio('success');
+        showTacticalToast('✓ Sensor óptico conectado en tiempo real.', 'success');
+        addAuditLog('CAMERA_START', `Cámara activa en módulo ${target.toUpperCase()}`);
+      } catch (err) {
+        console.error('Error al inicializar cámara:', err);
         isRealCameraRunning = false;
-        if (label) label.innerText = 'CÁMARA TRASERA';
-        showTacticalToast('Emulador óptico reactivado.', 'info');
+        let userMsg = 'No fue posible conectar con el sensor óptico.';
+
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          userMsg = 'Permiso denegado por el navegador.';
+          showModal('PERMISO DE CÁMARA REQUERIDO', `
+            <div class="space-y-3">
+              <p class="text-rose-300 font-bold">El navegador tiene bloqueado el permiso de cámara.</p>
+              <div class="bg-surface-950 p-3 rounded border border-surface-800 text-xs text-slate-300 space-y-2">
+                <p><b>Cómo habilitarlo:</b></p>
+                <ol class="list-decimal pl-4 space-y-1">
+                  <li>Presione el ícono de candado / permisos a la izquierda de la barra de direcciones URL.</li>
+                  <li>Cambie el permiso de <b>Cámara</b> a <b>"Permitir"</b>.</li>
+                  <li>Recargue la ventana o presione de nuevo <b>"ENCENDER CÁMARA"</b>.</li>
+                </ol>
+              </div>
+            </div>
+          `, 'video-off', true);
+        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+          userMsg = 'No se detectó hardware de cámara o webcam conectada en este equipo.';
+        } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+          userMsg = 'La cámara está siendo utilizada por otra aplicación o pestaña del sistema.';
+        } else if (err.message === 'MEDIA_NOT_SUPPORTED') {
+          userMsg = 'El navegador actual o contexto HTTP no soporta acceso a cámara (se requiere HTTPS o localhost).';
+        }
+
+        showTacticalToast(`⚠️ ${userMsg}`, 'error', 5500);
+        playTacticalAudio('error');
+        stopCameraStream();
+      }
+    }
+
+    function stopCameraStream() {
+      if (cameraState.activeStream) {
+        cameraState.activeStream.getTracks().forEach(track => {
+          try { track.stop(); } catch (e) {}
+        });
+        cameraState.activeStream = null;
+        cameraMediaStream = null;
+      }
+
+      if (cameraState.barcodeInterval) {
+        clearInterval(cameraState.barcodeInterval);
+        cameraState.barcodeInterval = null;
+      }
+
+      isRealCameraRunning = false;
+
+      // Reset Ingreso
+      const videoIngreso = document.getElementById('live-video-stream');
+      if (videoIngreso) {
+        videoIngreso.classList.add('hidden');
+        videoIngreso.srcObject = null;
+      }
+      const overlayIngreso = document.getElementById('sim-canvas-overlay');
+      if (overlayIngreso) {
+        overlayIngreso.classList.remove('opacity-20');
+        overlayIngreso.classList.add('opacity-90');
+      }
+      const btnToggleIngreso = document.getElementById('btn-camera-toggle-ingreso');
+      if (btnToggleIngreso) {
+        btnToggleIngreso.className = 'flex items-center gap-1.5 bg-[#00e082] hover:bg-[#00c773] text-black px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition shadow-lg shadow-emerald-500/20 active:scale-95 cursor-pointer backdrop-blur';
+      }
+      const btnTextIngreso = document.getElementById('btn-cam-text-ingreso');
+      if (btnTextIngreso) btnTextIngreso.innerText = 'ENCENDER CÁMARA';
+      const btnIconIngreso = document.getElementById('btn-cam-icon-ingreso');
+      if (btnIconIngreso) btnIconIngreso.setAttribute('data-lucide', 'video');
+      const badgeIngreso = document.getElementById('camera-stream-badge');
+      if (badgeIngreso) {
+        badgeIngreso.innerText = 'CÁMARA ÓPTICA INACTIVA (CLICK PARA ACTIVAR)';
+        badgeIngreso.className = 'text-slate-300 font-bold uppercase tracking-wider';
+      }
+      const dotIngreso = document.getElementById('camera-status-dot');
+      if (dotIngreso) dotIngreso.className = 'w-2 h-2 rounded-full bg-slate-500';
+
+      // Reset Salidas
+      const videoSalida = document.getElementById('live-video-stream-salida');
+      if (videoSalida) {
+        videoSalida.classList.add('hidden');
+        videoSalida.srcObject = null;
+      }
+      const overlaySalida = document.getElementById('sim-canvas-overlay-salida');
+      if (overlaySalida) {
+        overlaySalida.classList.remove('opacity-20');
+        overlaySalida.classList.add('opacity-80');
+      }
+      const btnToggleSalida = document.getElementById('btn-camera-toggle-salida');
+      if (btnToggleSalida) {
+        btnToggleSalida.className = 'flex items-center gap-1.5 bg-[#00e082] hover:bg-[#00c773] text-black px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition shadow-lg shadow-emerald-500/20 active:scale-95 cursor-pointer backdrop-blur';
+      }
+      const btnTextSalida = document.getElementById('btn-cam-text-salida');
+      if (btnTextSalida) btnTextSalida.innerText = 'ENCENDER CÁMARA';
+      const btnIconSalida = document.getElementById('btn-cam-icon-salida');
+      if (btnIconSalida) btnIconSalida.setAttribute('data-lucide', 'video');
+      const badgeSalida = document.getElementById('camera-status-label-salida');
+      if (badgeSalida) badgeSalida.innerText = 'CÁMARA ÓPTICA: INACTIVA';
+      const dotSalida = document.getElementById('camera-status-dot-salida');
+      if (dotSalida) dotSalida.className = 'w-2 h-2 rounded-full bg-slate-500';
+
+      cameraState.activeTarget = null;
+      lucide.createIcons();
+    }
+
+    async function switchCameraFacing(target = 'ingreso') {
+      cameraState.facingMode = cameraState.facingMode === 'environment' ? 'user' : 'environment';
+      showTacticalToast(`Conmutando a cámara ${cameraState.facingMode === 'environment' ? 'trasera' : 'frontal'}...`, 'info', 1500);
+      if (cameraState.activeStream) {
+        stopCameraStream();
+        await togglePhysicalCamera(target);
+      }
+    }
+
+    function startLiveBarcodeScanner(videoEl) {
+      if (!('BarcodeDetector' in window)) return;
+      try {
+        const detector = new BarcodeDetector({
+          formats: ['code_128', 'code_39', 'qr_code', 'ean_13', 'upc_a', 'itf']
+        });
+
+        let isAnalyzing = false;
+        let lastScanTime = 0;
+
+        cameraState.barcodeInterval = setInterval(async () => {
+          if (isAnalyzing || !cameraState.activeStream || !videoEl || videoEl.readyState < 2) return;
+          if (Date.now() - lastScanTime < 3000) return;
+
+          isAnalyzing = true;
+          try {
+            const results = await detector.detect(videoEl);
+            if (results && results.length > 0) {
+              const code = results[0].rawValue.trim().toUpperCase();
+              if (code.length >= 4) {
+                lastScanTime = Date.now();
+                const origin = LOGISTICS_ORIGINS[Math.floor(Math.random() * LOGISTICS_ORIGINS.length)];
+                const destination = LOGISTICS_DESTINATIONS[Math.floor(Math.random() * LOGISTICS_DESTINATIONS.length)];
+                procesarTicket(code, origin, destination);
+              }
+            }
+          } catch (e) {
+          } finally {
+            isAnalyzing = false;
+          }
+        }, 300);
+      } catch (e) {
+        console.log('BarcodeDetector no activo:', e);
       }
     }
 

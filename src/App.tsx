@@ -34,7 +34,7 @@ export default function App() {
         src="/Sistema.html"
         title="Sistema de Gestión Logística & Control Táctico - Bodega Central Amarateca"
         className="w-full h-full border-none block m-0 p-0"
-        allow="camera; microphone; clipboard-write"
+        allow="camera *; microphone *; clipboard-write; autoplay *; display-capture *"
       />
     </div>
   );
